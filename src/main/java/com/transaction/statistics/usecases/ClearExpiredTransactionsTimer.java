@@ -25,19 +25,22 @@ public class ClearExpiredTransactionsTimer extends TimerTask {
         timer.schedule(new ClearExpiredTransactionsTimer(), 0, 1000);
     }
 
-    public static void removeExpiredTransactions(){
+    public static void removeExpiredTransactions() {
         transactions.values().removeIf(transactionItem -> checkIfOneMinuteOld(transactionItem));
     }
 
     private static boolean checkIfOneMinuteOld(Transaction mapItem) {
         try {
-            Instant transactionTime = Instant.parse(mapItem.getTimestamp());
-            Instant now = Instant.now();
-            Instant maxTime = now.minusSeconds(EXPIRE_SECONDS);
-            return !(!transactionTime.isBefore(maxTime)) && transactionTime.isBefore(now);
+            return isOneMinuteOld(mapItem.getTimestamp());
         } catch (Exception ex) {
             log.error("Failed to check for expired transactions", ex);
             return true;
         }
+    }
+
+    static boolean isOneMinuteOld(Instant TransactionTimestamp) {
+        Instant now = Instant.now();
+        Instant maxTime = now.minusSeconds(EXPIRE_SECONDS);
+        return !(!TransactionTimestamp.isBefore(maxTime)) && TransactionTimestamp.isBefore(now);
     }
 }

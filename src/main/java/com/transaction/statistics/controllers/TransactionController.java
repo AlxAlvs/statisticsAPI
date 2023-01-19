@@ -6,6 +6,7 @@ import com.transaction.statistics.entities.dtos.TransactionResponseDTO;
 import com.transaction.statistics.mapper.TransactionMapper;
 import com.transaction.statistics.services.TransactionService;
 import com.transaction.statistics.usecases.ClearExpiredTransactionsTimer;
+import com.transaction.statistics.usecases.ValidateFields;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -31,6 +32,7 @@ public class TransactionController {
     private AtomicBoolean isInitialized = new AtomicBoolean(false);
 
     private final TransactionService transactionService;
+    private final ValidateFields ValidateFields;
 
     @ApiOperation(
         value = "Save transaction",
@@ -55,8 +57,7 @@ public class TransactionController {
             @NotBlank(message = "Idempotency key is empty") final String idempotencyKey,
             @RequestBody @Valid TransactionDTO transactionDTO) {
         beginClearExpiredTransactionsRoutine();
-        Transaction transaction = transactionService.save(
-                TransactionMapper.dtoToEntity(transactionDTO), idempotencyKey);
+        Transaction transaction = transactionService.save(ValidateFields.execute(transactionDTO), idempotencyKey);
         return new ResponseEntity<>(TransactionMapper.entityToResponse(transaction), HttpStatus.CREATED);
     }
 
