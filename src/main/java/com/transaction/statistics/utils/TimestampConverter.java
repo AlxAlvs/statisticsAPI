@@ -8,7 +8,7 @@ public class TimestampConverter {
         return Instant.parse(value);
     }
 
-    public static String InstantToString(Instant value) {
+    public static String instantToString(Instant value) {
         return value.toString();
     }
 }

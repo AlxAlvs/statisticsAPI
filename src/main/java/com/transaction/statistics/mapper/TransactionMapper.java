@@ -6,7 +6,7 @@ import com.transaction.statistics.entities.dtos.TransactionResponseDTO;
 
 import static com.transaction.statistics.utils.AmountConverter.bigDecimalToString;
 import static com.transaction.statistics.utils.AmountConverter.stringToBigDecimal;
-import static com.transaction.statistics.utils.TimestampConverter.InstantToString;
+import static com.transaction.statistics.utils.TimestampConverter.instantToString;
 import static com.transaction.statistics.utils.TimestampConverter.stringToInstant;
 
 
@@ -16,21 +16,21 @@ public class TransactionMapper {
 
         return TransactionDTO.builder()
                 .amount(bigDecimalToString(transaction.getAmount()))
-                .timestamp(InstantToString(transaction.getTimestamp()))
+                .timestamp(instantToString(transaction.getTimestamp()))
                 .build();
-    };
+    }
 
     public static Transaction dtoToEntity(TransactionDTO transactionDTO) {
         return Transaction.builder()
                 .amount(stringToBigDecimal(transactionDTO.getAmount()))
                 .timestamp(stringToInstant(transactionDTO.getTimestamp()))
                 .build();
-    };
+    }
 
     public static TransactionResponseDTO entityToResponse(Transaction transaction) {
         return TransactionResponseDTO.builder()
                 .amount(transaction.getAmount())
                 .timestamp(transaction.getTimestamp())
                 .build();
-    };
+    }
 }

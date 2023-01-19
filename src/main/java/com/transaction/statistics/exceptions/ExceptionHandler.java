@@ -11,7 +11,6 @@ import java.time.Instant;
 @ControllerAdvice
 @Slf4j
 public class ExceptionHandler {
-    private static final String INTERNAL_SERVER_ERROR_MESSAGE = "Internal Server Error";
 
     @org.springframework.web.bind.annotation.ExceptionHandler
     public ResponseEntity<Void> handleNullPointerException(final NullPointerException ex) {
