@@ -5,6 +5,7 @@ import com.transaction.statistics.entities.dtos.TransactionStatisticsDTO;
 
 
 public interface TransactionService {
-    Transaction save(Transaction transaction, String idempotencyKey);
+    void save(Transaction transaction, String idempotencyKey);
     TransactionStatisticsDTO getStatistics();
+    void deleteTransactions();
 }

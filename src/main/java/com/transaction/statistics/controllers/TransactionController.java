@@ -1,10 +1,8 @@
 package com.transaction.statistics.controllers;
 
-import com.transaction.statistics.entities.Transaction;
+import com.transaction.statistics.entities.dtos.EmptyBody;
 import com.transaction.statistics.entities.dtos.TransactionDTO;
-import com.transaction.statistics.entities.dtos.TransactionResponseDTO;
 import com.transaction.statistics.entities.dtos.TransactionStatisticsDTO;
-import com.transaction.statistics.mapper.TransactionMapper;
 import com.transaction.statistics.services.TransactionService;
 import com.transaction.statistics.usecases.ClearExpiredTransactionsTimer;
 import com.transaction.statistics.usecases.ValidateTransactionFields;
@@ -31,7 +29,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class TransactionController {
 
     private AtomicBoolean isInitialized = new AtomicBoolean(false);
-
     private final TransactionService transactionService;
     private final ValidateTransactionFields validateTransactionFields;
 
@@ -50,27 +47,43 @@ public class TransactionController {
     )
     @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping(path = "/transaction", produces = MediaType.APPLICATION_JSON_VALUE )
-    public ResponseEntity<TransactionResponseDTO> saveTransaction (
+    public ResponseEntity<Void> saveTransaction (
             @RequestHeader("idempotency-key")
             @NotBlank(message = "Idempotency key is empty") final String idempotencyKey,
             @RequestBody @Valid TransactionDTO transactionDTO) {
         log.info("Receiving transaction");
         beginClearExpiredTransactionsRoutine();
-        Transaction transaction = transactionService.save(validateTransactionFields.execute(transactionDTO), idempotencyKey);
-        return new ResponseEntity<>(TransactionMapper.entityToResponse(transaction), HttpStatus.CREATED);
+        transactionService.save(validateTransactionFields.execute(transactionDTO), idempotencyKey);
+        log.info("Saved transaction successfully");
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @ApiOperation(value = "Get statistics about last transactions")
     @ApiResponses(
-            value = {
-                @ApiResponse(code = 200, message = "Statistics returned successfully"),
-                @ApiResponse(code = 400, message = "Bad request")
-            }
+        value = {
+            @ApiResponse(code = 200, message = "Statistics returned successfully"),
+            @ApiResponse(code = 400, message = "Bad request")
+        }
     )
     @GetMapping(path = "/statistics", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<TransactionStatisticsDTO> getTransactionStatistics() {
         log.info("Fetching statistics request");
         return new ResponseEntity<>(transactionService.getStatistics(), HttpStatus.OK);
+    }
+
+    @ApiOperation(value = "Remove transactions")
+    @ApiResponses(
+        value = {
+            @ApiResponse(code = 200, message = "Removed transactions successfully"),
+            @ApiResponse(code = 400, message = "Bad request")
+        }
+    )
+    @DeleteMapping(path = "/delete")
+    public ResponseEntity<Void> deleteTransactionStatistics(@RequestBody EmptyBody emptyBody) {
+        log.info("Removing transactions request");
+        transactionService.deleteTransactions();
+        log.info("Removed transactions successfully");
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     private void beginClearExpiredTransactionsRoutine() {

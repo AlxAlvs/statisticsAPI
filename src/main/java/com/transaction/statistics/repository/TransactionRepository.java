@@ -16,20 +16,24 @@ import static com.transaction.statistics.utils.AmountConverter.stringToBigDecima
 @Service
 public class TransactionRepository implements TransactionService {
     public static ConcurrentMap<String, Transaction> transactions = new ConcurrentHashMap<>();
-
     private static TransactionStatisticsDTO statisticsDTO;
 
     @Override
-    public Transaction save(Transaction transaction, String idempotencyKey) {
+    public void save(Transaction transaction, String idempotencyKey) {
         log.info("Saving transaction");
         transactions.putIfAbsent(idempotencyKey, transaction);
-        return transaction;
     }
 
     @Override
     public TransactionStatisticsDTO getStatistics() {
         log.info("Getting Statistics");
         return statisticsDTO;
+    }
+
+    @Override
+    public void deleteTransactions() {
+        log.info("Deleting transactions");
+        transactions.clear();
     }
 
     public static void setCurrentStatisticValues(BigDecimal sum, BigDecimal avg, BigDecimal max, BigDecimal min) {
