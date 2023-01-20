@@ -23,11 +23,11 @@ public class ClearExpiredTransactionsTimerUnitTest {
 
     @Test
     @DisplayName("Should remove element successfully")
-    void shouldRemoveElementSuccesfully() {
+    void shouldRemoveElementSuccessfully() {
         transactions.put(
             "a12312", getOldTransaction()
         );
-        clearExpiredTransactionsTimer.removeExpiredTransactions();
+        clearExpiredTransactionsTimer.removeExpiredTransactionsAndGenerateStatistics();
         Assertions.assertThat(transactions.size()).isEqualTo(0);
     }
 
@@ -38,7 +38,7 @@ public class ClearExpiredTransactionsTimerUnitTest {
             "a12312",
             getValidTransaction()
         );
-        clearExpiredTransactionsTimer.removeExpiredTransactions();
+        clearExpiredTransactionsTimer.removeExpiredTransactionsAndGenerateStatistics();
         Assertions.assertThat(transactions.size()).isEqualTo(1);
     }
 }

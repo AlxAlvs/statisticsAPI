@@ -3,6 +3,7 @@ package com.transaction.statistics.controllers;
 import com.transaction.statistics.entities.Transaction;
 import com.transaction.statistics.entities.dtos.TransactionDTO;
 import com.transaction.statistics.entities.dtos.TransactionResponseDTO;
+import com.transaction.statistics.entities.dtos.TransactionStatisticsDTO;
 import com.transaction.statistics.mapper.TransactionMapper;
 import com.transaction.statistics.services.TransactionService;
 import com.transaction.statistics.usecases.ClearExpiredTransactionsTimer;
@@ -44,14 +45,11 @@ public class TransactionController {
             @ApiResponse(code = 201, message = "Transaction saved successfully"),
             @ApiResponse(code = 400, message = "Bad request"),
             @ApiResponse(code = 204, message = "The transaction is older than 60 seconds"),
-            @ApiResponse(code = 422, message = "Failed to parse/transaction date is in the future")
+            @ApiResponse(code = 422, message = "The transaction is in the future or could not be parsed")
         }
     )
     @ResponseStatus(value = HttpStatus.CREATED)
-    @PostMapping(
-        path = "/transaction",
-        produces = MediaType.APPLICATION_JSON_VALUE
-    )
+    @PostMapping(path = "/transaction", produces = MediaType.APPLICATION_JSON_VALUE )
     public ResponseEntity<TransactionResponseDTO> saveTransaction (
             @RequestHeader("idempotency-key")
             @NotBlank(message = "Idempotency key is empty") final String idempotencyKey,
@@ -59,6 +57,18 @@ public class TransactionController {
         beginClearExpiredTransactionsRoutine();
         Transaction transaction = transactionService.save(validateTransactionFields.execute(transactionDTO), idempotencyKey);
         return new ResponseEntity<>(TransactionMapper.entityToResponse(transaction), HttpStatus.CREATED);
+    }
+
+    @ApiOperation(value = "Get statistics about last transactions")
+    @ApiResponses(
+            value = {
+                @ApiResponse(code = 200, message = "Statistics returned successfully"),
+                @ApiResponse(code = 400, message = "Bad request")
+            }
+    )
+    @GetMapping(path = "/statistics", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<TransactionStatisticsDTO> getTransactionStatistics() {
+        return new ResponseEntity<>(transactionService.getStatistics(), HttpStatus.OK);
     }
 
     private void beginClearExpiredTransactionsRoutine() {
