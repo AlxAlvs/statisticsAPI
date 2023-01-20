@@ -35,16 +35,21 @@ public class ClearExpiredTransactionsTimer extends TimerTask {
 
         for(Iterator<Map.Entry<String, Transaction>> it = transactions.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry<String, Transaction> entry = it.next();
-            if (isOneMinuteOld(entry.getValue())) {
-                it.remove();
-                continue;
-            }
+            if (shouldRemoveEntry(it, entry)) continue;
             sum = sumAmount(sum, entry);
             max = getMaximumValue(max, entry);
             min = getMinimumValue(min, entry);
         }
         avg = getAverageAmount(sum);
         setCurrentStatisticValues(sum, avg, max, min);
+    }
+
+    private static boolean shouldRemoveEntry(Iterator<Map.Entry<String, Transaction>> it, Map.Entry<String, Transaction> entry) {
+        if (isOneMinuteOld(entry.getValue())) {
+            it.remove();
+            return true;
+        }
+        return false;
     }
 
     private static BigDecimal getMinimumValue(BigDecimal min, Map.Entry<String, Transaction> entry) {

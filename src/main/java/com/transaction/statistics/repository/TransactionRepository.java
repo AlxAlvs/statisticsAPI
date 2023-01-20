@@ -21,12 +21,14 @@ public class TransactionRepository implements TransactionService {
 
     @Override
     public Transaction save(Transaction transaction, String idempotencyKey) {
+        log.info("Saving transaction");
         transactions.putIfAbsent(idempotencyKey, transaction);
         return transaction;
     }
 
     @Override
     public TransactionStatisticsDTO getStatistics() {
+        log.info("Getting Statistics");
         return statisticsDTO;
     }
 

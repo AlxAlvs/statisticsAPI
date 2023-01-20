@@ -54,6 +54,7 @@ public class TransactionController {
             @RequestHeader("idempotency-key")
             @NotBlank(message = "Idempotency key is empty") final String idempotencyKey,
             @RequestBody @Valid TransactionDTO transactionDTO) {
+        log.info("Receiving transaction");
         beginClearExpiredTransactionsRoutine();
         Transaction transaction = transactionService.save(validateTransactionFields.execute(transactionDTO), idempotencyKey);
         return new ResponseEntity<>(TransactionMapper.entityToResponse(transaction), HttpStatus.CREATED);
@@ -68,6 +69,7 @@ public class TransactionController {
     )
     @GetMapping(path = "/statistics", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<TransactionStatisticsDTO> getTransactionStatistics() {
+        log.info("Fetching statistics request");
         return new ResponseEntity<>(transactionService.getStatistics(), HttpStatus.OK);
     }
 
