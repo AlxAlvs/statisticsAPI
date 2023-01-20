@@ -2,6 +2,7 @@ package com.transaction.statistics.repository;
 
 import com.transaction.statistics.entities.Transaction;
 import com.transaction.statistics.entities.dtos.TransactionStatisticsDTO;
+import com.transaction.statistics.exceptions.InvalidFieldException;
 import com.transaction.statistics.services.TransactionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,11 @@ public class TransactionRepository implements TransactionService {
     @Override
     public void save(Transaction transaction, String idempotencyKey) {
         log.info("Saving transaction");
-        transactions.putIfAbsent(idempotencyKey, transaction);
+        if (transactions.containsKey(idempotencyKey)) {
+            log.error("Transaction already saved. IdempotencyKey should be different");
+            throw new InvalidFieldException.Builder().build();
+        }
+        transactions.put(idempotencyKey, transaction);
     }
 
     @Override
